@@ -16,18 +16,18 @@ public class Lexer {
 		static final String TYPE_INT = "INT";
 		static final String TYPE_DEC = "DEC";
 		static final String TYPE_ERR = "ERR";
-		
+
 		Token(String tokenType, int start, int len) {
 			this.tokenType = tokenType;
 			this.start = start;
 			this.len = len;
 		}
-		
+
 		String tokenType;  /* トークンの種類 */
 		int start;         /* 文字列中のトークン開始位置 */
 		int len;           /* トークンの長さ */
 	}
-	
+
 	static final int CT_P = 0;
 	static final int CT_X = 1;
 	static final int CT_0 = 2;
@@ -48,7 +48,7 @@ public class Lexer {
 		if ('A' <= c && c <= 'F') return CT_A;
 		return CT_OTHER;
 	}
-	
+
 	int[][] delta = {
 		/* TODO */
 		/* 状態遷移表を作る */
@@ -58,6 +58,12 @@ public class Lexer {
 		/*{ ?, ?, ?, ?, ?, ?}, /* 状態0 */
 		/*{ ?, ?, ?, ?, ?, ?}, /* 状態1 */
 		/*...*/
+		{CT_OTHER, CT_OTHER, CT_0, CT_1, CT_A, CT_OTHER}, //p
+		{CT_P, CT_OTHER, CT_0, CT_1, CT_A, CT_OTHER}, //x
+		{CT_P, CT_X, CT_0, CT_1, CT_A, CT_OTHER}, //0
+		{CT_P, CT_OTHER, CT_0, CT_1, CT_A, CT_OTHER}, //1
+		{CT_P, CT_OTHER, CT_0, CT_1, CT_A, CT_OTHER}, //A
+		{CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER, CT_OTHER}  //OTHER
 	};
 
 	/*
@@ -77,20 +83,39 @@ public class Lexer {
 		while (p < str.length()) {
 			int c = str.charAt(p); /* str の p 文字目を読み取る */
 			p++;
-			
+
 			int ct = getCharType(c);
 			int nextState = delta[currentState][ct];
 
 			/* TODO */
 			/* 行先がなければループを抜ける */
 			/* 行先が受理状態であれば「最後の受理状態」を更新する */
-
+			if(nextState == CT_P){
+				if(currentState == CT_P) {
+					if(acceptMarker == Token.TYPE_INT) break;
+					if(acceptMarker == Token.TYPE_DEC) acceptMarker = Token.TYPE_INT;
+				}
+				if(currentState == CT_X) break;
+			}
+			if(nextState == CT_X) {
+				if(currentState != CT_0) break;
+			}
+			if(nextState == CT_0) {
+				if(acceptMarker == Token.TYPE_ERR) acceptMarker = Token.TYPE_DEC;
+				if(currentState == CT_0) start++;
+			}
+			if(nextState == CT_0 || nextState == CT_1 || nextState == CT_A){
+				if(currentState == CT_P) acceptMarker = Token.TYPE_INT;
+			}
+			if(nextState == CT_OTHER) break;
+			acceptPos++;
+			//
 			currentState = nextState;
 		}
-		
+
 		return new Token(acceptMarker, start, acceptPos - start);
 	}
-	
+
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
 		String str = sc.nextLine();  /* 1行読み取る */
