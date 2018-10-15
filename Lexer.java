@@ -58,12 +58,14 @@ public class Lexer {
 		/*{ ?, ?, ?, ?, ?, ?}, /* 状態0 */
 		/*{ ?, ?, ?, ?, ?, ?}, /* 状態1 */
 		/*...*/
-		{1,-1,2,5,5,-1}, /* 状態0  */
-		{-1,-1,1,1,1,-1}, /* 状態1 ok*/
-		{1,3,2,4,1,-1}, /* 状態2 ok*/
-		{1,-1,1,1,1,-1}, /* 状態3 no*/
-		{1,-1,4,4,1,-1}, /* 状態4 no*/
-		{1,-1,5,5,5,-1} /* 状態5 ok*/
+		{6,-1,2,5,3,-1}, /* 状態0  */
+		{-1,-1,1,1,1,-1}, /* 状態1 ok 小数部*/
+		{1,7,2,4,5,-1}, /* 状態2 ok　最初が0のとき*/
+		{-1,-1,3,3,3,-1}, /* 状態3  16進数*/
+		{1,-1,4,4,3,-1}, /* 状態4 no 0から始まる10進数*/
+		{1,-1,5,5,3,-1}, /* 状態5 10 ok　普通の10進数*/
+		{-1,-1,1,1,-1,-1}, /*　状態6 no 最初が小数点*/
+		{1,-1,3,3,3,-1}, /*　状態7 no 0x,0Xのとき*/
 	};
 
 	/*
@@ -95,9 +97,9 @@ public class Lexer {
 				acceptMarker = Token.TYPE_DEC;
 				acceptPos = p;
 			}
-			if(nextState == 2 || nextState == 5) {
-				if(currentState == 2) start++;
-				acceptMarker = Token.TYPE_DEC;
+			if(nextState == 2 || nextState == 3 || nextState == 5) {
+				/*if(currentState == 2) start++;*/
+				acceptMarker = Token.TYPE_INT;
 				acceptPos = p;
 			}
 
