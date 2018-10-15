@@ -91,8 +91,8 @@ public class Lexer {
 
 			/* TODO */
 			/* 行先がなければループを抜ける */
-			/* 行先が受理状態であれば「最後の受理状態」を更新する */
 			if(nextState == -1) break;
+			/* 行先が受理状態であれば「最後の受理状態」を更新する */
 			if(nextState == 1) {
 				acceptMarker = Token.TYPE_DEC;
 				acceptPos = p;
@@ -102,8 +102,6 @@ public class Lexer {
 				acceptMarker = Token.TYPE_INT;
 				acceptPos = p;
 			}
-
-			//
 			currentState = nextState;
 		}
 
